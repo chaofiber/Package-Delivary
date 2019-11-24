@@ -15,7 +15,10 @@ Given index i, we can obtain its position immediately, consider all 13 possible 
 Computer the number of trees n between the given place and the most left and most right possible positions;
 Use n as the bound for searching all other rest index among 13 possible next states;
 Memorize ```NormalReachable{i}``` and ```IMNormalReachable{i}```;
+```
+Search range: {start,[i-2n-2,i-2n+2+2p1],[i-4,i+4],[i+2n-2p2,i+2n+2],end}
 ## Compute Cost Function Matrix
 ```
 G(i,u) = 1 + (\sum_{j\in NormalReachable{i}} P(i,j,u))*10
 ```
+
