@@ -17,6 +17,7 @@ Use n as the bound for searching all other rest index among 13 possible next sta
 Memorize ```NormalReachable{i}``` and ```IMNormalReachable{i}```;
 ```
 Search range: {start,[i-2n-2,i-2n+2+2p1],[i-4,i+4],[i+2n-2p2,i+2n+2],end}
+```
 ## Compute Cost Function Matrix
 ```
 G(i,u) = 1 + (\sum_{j\in NormalReachable{i}} P(i,j,u))*10
