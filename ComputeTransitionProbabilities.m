@@ -42,16 +42,20 @@ for i = 1:K
     %                    A B i D E 
     %                      J K L
     %                        M
-    
-    % CASE ONE: WEST
-    
-    % CASE TWO: SOUTH
-    
-    % CASE THREE: NORTH
-    
-    % CASE FOUR: EAST
-    
-    % CASE FIVE: HOVER
+    for action = [WEST, SOUTH, NORTH, EAST, HOVER]
+        switch action
+            case WEST
+                
+            case SOUTH
+                
+            case NORTH
+                
+            case EAST
+                
+            case HOVER
+                
+        end
+    end
     
     posI_x, posI_y, state = stateSpace(i,:,:);
     posI_A = [posI_x, pos_y-2];
@@ -87,15 +91,20 @@ r = length(A);
    while l < r
       idx = 1 + floor((l + r - 1) / 2);
       if A(idx) > num
-        r = idx - 1; 
-      elseif A(idx) <= num
-        l = idx;
+          r = idx - 1; 
+      end
+      if A(idx) < num
+          l = idx + 1;
+      end
+      if A(idx) == num
+          idx = -1; % Hitting the tree!
+          return
       end
    end
-   if l == r
+   if l == r       
       idx = r; 
    end
-   if A(idx) > num
-     idx = -1;
+   if A(idx) > num  % There is ne trees ahead of the cell!
+     idx = 0;
    end
 end
