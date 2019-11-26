@@ -32,20 +32,35 @@ global K TERMINAL_STATE_INDEX
 % find the treeList (number of tree * 1)
 treeList = findTree(map);
 num_tree = size(treeList,1);
-m, n = size(map);
+global m n
+[m, n] = size(map);
+
 P = zeros(K,K,5);
 
-for i = 1:K
+for i = 1:2:K
     % Possible position can be reached from state i stateSpace(i) = (i,0/1)
     %                        I
     %                      F G H
     %                    A B i D E 
     %                      J K L
     %                        M
+    
+    posI_x, posI_y, state = stateSpace(i,:,:);
+    posA = [posI_x, pos_y-2];
+    posE = [posI_x, pos_y+2];
+    idxI = n*posI_x + posI_y;
+    idxA = n*posI_x + posI_y;
+    p = binarySearch(treeList, idxI, false) - binarySearch(treeList, idxA, false);
     for action = [WEST, SOUTH, NORTH, EAST, HOVER]
         switch action
             case WEST
-                
+                % Check if this action is allowed
+                ppos = [posI_x, posI_y-1];
+                if binarySearch(treeList,n*ppos(1)+ppos(2),true) ~= -1
+                    
+                end
+                    
+                    
             case SOUTH
                 
             case NORTH
@@ -56,11 +71,7 @@ for i = 1:K
                 
         end
     end
-    
-    posI_x, posI_y, state = stateSpace(i,:,:);
-    posI_A = [posI_x, pos_y-2];
-    idxI = n*posI_x + posI_y;
-    idxA = n*posI_x + posI_y;
+
     % Compute number of trees between i and A: p 
     
 end
@@ -83,13 +94,15 @@ for i = 1:size(map,1)
 end
 end
 
-function idx = binarySearch(A, num)
+function idx = binarySearch(A, num, Issearch)
 % return the idx of a cell in the treeList
+% If set Issearch = true, return -1 for hitting the tree, otherwise, return
+% the index
 l = 1;
 r = length(A);
    idx = 1;
-   while l < r
-      idx = 1 + floor((l + r - 1) / 2);
+   while l <= r
+      idx = floor((l + r) / 2);
       if A(idx) > num
           r = idx - 1; 
       end
@@ -97,14 +110,11 @@ r = length(A);
           l = idx + 1;
       end
       if A(idx) == num
-          idx = -1; % Hitting the tree!
+          if Issearch
+              idx = -1; % Hitting the tree!
+          end
           return
       end
    end
-   if l == r       
-      idx = r; 
-   end
-   if A(idx) > num  % There is ne trees ahead of the cell!
-     idx = 0;
-   end
+   idx = l;
 end
