@@ -74,10 +74,11 @@ for i = 1:2:K
                 % happens
                 ppos = pos_i + [-1, 0];
                 if binarySearch(treeList,n*ppos(1)+ppos(2),true) ~= -1 && ~OutOfBorder(m,n,ppos)
+                    p_normal = 0;
                     % Search possible states after WEST action and the wind
                     %for j = [ (i-2*n):2:(i-2*n+2+2*p),i-4:2:i ] % possible reachable state indexs]
-                    %for j = [ (i-4*n:2:i+4*n)]
-                    for j = [1:2:K]
+                    for j = [ (i-4*n:2:i+4*n)]
+                    %for j = [1:2:K]
                         if j<1 || j>K; continue; end
                     	pos_state_j = stateSpace(j,:,:);
                         pos_j = pos_state_j(1:2);
@@ -85,31 +86,36 @@ for i = 1:2:K
                             case (pos_i + [-1, 0])*[n,1]'
                                 P_temp = (1 - P_WIND); 
                                 P(i, j, action) = P_temp*Prob_Survive(pos_j(1), pos_j(2));
-                                P_IMNORMAL_TO_BASE(i, action) = P_IMNORMAL_TO_BASE(i, action) + (P_temp - P(i, j, action));
+                                p_normal = p_normal + P(i,j,action);
+                                %P_IMNORMAL_TO_BASE(i, action) = P_IMNORMAL_TO_BASE(i, action) + (P_temp - P(i, j, action));
                             case pos_i*[n,1]'
                                 P_temp = P_WIND * 0.25;
                                 P(i, j, action) = P_temp * Prob_Survive(pos_j(1), pos_j(2));
-                                P_IMNORMAL_TO_BASE(i, action) = P_IMNORMAL_TO_BASE(i, action) + (P_temp - P(i, j, action));
+                                p_normal = p_normal + P(i,j,action);
+                                %P_IMNORMAL_TO_BASE(i, action) = P_IMNORMAL_TO_BASE(i, action) + (P_temp - P(i, j, action));
                             case {(pos_i + [-1, 1])*[n,1]', (pos_i + [-1,-1])*[n,1]', (pos_i + [-2, 0])*[n,1]'}
                                 if binarySearch(treeList,n*pos_j(1)+pos_j(2),true) ~= -1 && ~OutOfBorder(m,n,pos_j)
                                     P_temp = P_WIND * 0.25;
                                     P(i ,j, action) = P_temp * Prob_Survive(pos_j(1), pos_j(2));
-                                    P_IMNORMAL_TO_BASE(i, action) = P_IMNORMAL_TO_BASE(i, action) + (P_temp - P(i, j, action));
+                                    p_normal = p_normal + P(i,j,action);
+                                    %P_IMNORMAL_TO_BASE(i, action) = P_IMNORMAL_TO_BASE(i, action) + (P_temp - P(i, j, action));
                                 else
-                                    P_IMNORMAL_TO_BASE(i,action) = P_IMNORMAL_TO_BASE(i,action) + P_WIND * 0.25;
+                                    %P_IMNORMAL_TO_BASE(i,action) = P_IMNORMAL_TO_BASE(i,action) + P_WIND * 0.25;
                                 end
                                 
                         end
                     end
+                    P_IMNORMAL_TO_BASE(i, action) = 1 - p_normal;
                 end
                 
             case SOUTH
                 ppos = pos_i + [0, -1];
                 if binarySearch(treeList,n*ppos(1)+ppos(2),true) ~= -1 && ~OutOfBorder(m,n,ppos)
+                    p_normal = 0;
                     % Search possible states after WEST action and the wind
                     %for j = [ (i-2*n):2:(i-2*n+2+2*p),i-4:2:i+4, i+2*n-2*q:2:i+2*n+2] % possible reachable state indexs]
-                    %for j = [ (i-4*n:2:i+4*n)]
-                    for j = [1:2:K]
+                    for j = [ (i-4*n:2:i+4*n)]
+                    %for j = [1:2:K]
                         if j<1 || j>K; continue; end
                     	pos_state_j = stateSpace(j,:,:);
                         pos_j = pos_state_j(1:2);
@@ -117,63 +123,73 @@ for i = 1:2:K
                             case (pos_i + [0, -1])*[n,1]'
                                 P_temp = (1 - P_WIND);
                                 P(i, j, action) = P_temp * Prob_Survive(pos_j(1), pos_j(2)); 
-                                P_IMNORMAL_TO_BASE(i, action) = P_IMNORMAL_TO_BASE(i, action) + (P_temp - P(i, j, action));
+                                p_normal = p_normal + P(i,j,action);
+                                %P_IMNORMAL_TO_BASE(i, action) = P_IMNORMAL_TO_BASE(i, action) + (P_temp - P(i, j, action));
                             case pos_i*[n,1]'
                                 P_temp = P_WIND * 0.25;
                                 P(i, j, action) = P_temp * Prob_Survive(pos_j(1), pos_j(2));
-                                P_IMNORMAL_TO_BASE(i, action) = P_IMNORMAL_TO_BASE(i, action) + P_temp - P(i,j,action);
+                                p_normal = p_normal + P(i,j,action);
+                                %P_IMNORMAL_TO_BASE(i, action) = P_IMNORMAL_TO_BASE(i, action) + P_temp - P(i,j,action);
                             case {(pos_i + [-1, -1])*[n,1]', (pos_i + [1,-1])*[n,1]', (pos_i + [0, -2])*[n,1]'}
                                 if binarySearch(treeList,n*pos_j(1)+pos_j(2),true) ~= -1 && ~OutOfBorder(m,n,pos_j)
                                     P_temp = P_WIND * 0.25;
                                     P(i, j, action) = P_temp * Prob_Survive(pos_j(1), pos_j(2));
-                                    P_IMNORMAL_TO_BASE(i, action) = P_IMNORMAL_TO_BASE(i, action) + P_temp - P(i,j,action);
+                                    p_normal = p_normal + P(i,j,action);
+                                    %P_IMNORMAL_TO_BASE(i, action) = P_IMNORMAL_TO_BASE(i, action) + P_temp - P(i,j,action);
                                 else
-                                    P_IMNORMAL_TO_BASE(i,action) = P_IMNORMAL_TO_BASE(i,action) + P_WIND * 0.25;
+                                    %P_IMNORMAL_TO_BASE(i,action) = P_IMNORMAL_TO_BASE(i,action) + P_WIND * 0.25;
                                 end
                                 
                         end
                     end
+                    P_IMNORMAL_TO_BASE(i, action) = 1 - p_normal;
                 end    
                 
             case NORTH
                 ppos = pos_i + [0, 1];
                 if binarySearch(treeList,n*ppos(1)+ppos(2),true) ~= -1 && ~OutOfBorder(m,n,ppos)
+                    p_normal = 0;
                     % Search possible states after WEST action and the wind
                     %for j = [ (i-2*n):2:(i-2*n+2+2*p),i-4:2:i+4, i+2*n-2*q:2:i+2*n+2 ] % possible reachable state indexs]
-                    %for j = [ (i-4*n:2:i+4*n)]
-                    for j = [1:2:K]
-                        if j<1 || j>K; continue; end
+                    for j = [ (i-4*n:2:i+4*n)]
+                    %for j = [1:2:K]
+                        if j<1 || j>K; continue; end  % ALSO EXCLUDE THE CASE WHERE J IS OUTOFBORDER!!!
                     	pos_state_j = stateSpace(j,:,:);
                         pos_j = pos_state_j(1:2);
                         switch pos_j*[n,1]'
                             case (pos_i + [0, 1])*[n,1]'
                                 P_temp = (1 - P_WIND);
                                 P(i, j, action) = P_temp * Prob_Survive(pos_j(1), pos_j(2)); 
-                                P_IMNORMAL_TO_BASE(i, action) = P_IMNORMAL_TO_BASE(i, action) + P_temp - P(i,j,action);
+                                p_normal = p_normal + P(i,j,action);
+                                %P_IMNORMAL_TO_BASE(i, action) = P_IMNORMAL_TO_BASE(i, action) + P_temp - P(i,j,action);
                             case pos_i*[n,1]'
                                 P_temp = P_WIND * 0.25;
                                 P(i, j, action) = P_temp * Prob_Survive(pos_j(1), pos_j(2));
-                                P_IMNORMAL_TO_BASE(i, action) = P_IMNORMAL_TO_BASE(i, action) + P_temp - P(i,j,action);
+                                p_normal = p_normal + P(i,j,action);
+                                %P_IMNORMAL_TO_BASE(i, action) = P_IMNORMAL_TO_BASE(i, action) + P_temp - P(i,j,action);
                             case {(pos_i + [-1, 1])*[n,1]', (pos_i + [1,1])*[n,1]', (pos_i + [0, 2])*[n,1]'}
                                 if binarySearch(treeList,n*pos_j(1)+pos_j(2),true) ~= -1 && ~OutOfBorder(m,n,pos_j)
                                     P_temp = P_WIND * 0.25;
                                     P(i,j,action) = P_temp * Prob_Survive(pos_j(1), pos_j(2));
-                                    P_IMNORMAL_TO_BASE(i, action) = P_IMNORMAL_TO_BASE(i, action) + P_temp - P(i,j,action);
+                                    p_normal = p_normal + P(i,j,action);
+                                    %P_IMNORMAL_TO_BASE(i, action) = P_IMNORMAL_TO_BASE(i, action) + P_temp - P(i,j,action);
                                 else
-                                    P_IMNORMAL_TO_BASE(i,action) = P_IMNORMAL_TO_BASE(i,action) + P_WIND * 0.25;
+                                    %P_IMNORMAL_TO_BASE(i,action) = P_IMNORMAL_TO_BASE(i,action) + P_WIND * 0.25;
                                 end
                                 
                         end
                     end
+                    P_IMNORMAL_TO_BASE(i, action) = 1 - p_normal;
                 end
                 
             case EAST
                 ppos = pos_i + [1, 0];
                 if binarySearch(treeList,n*ppos(1)+ppos(2),true) ~= -1 && ~OutOfBorder(m,n,ppos)
+                    p_normal = 0;
                     % Search possible states after WEST action and the wind
                     %for j = [(i-2*n):2:(i-2*n+2+2*p),i-4:2:i+4, i+2*n-2*q:2:i+2*n+2] % possible reachable state indexs]
-                    %for j = [ (i-4*n:2:i+4*n)]
-                    for j = [1:2:K]
+                    for j = [ (i-4*n:2:i+4*n)]
+                    %for j = [1:2:K]
                         if j<1 || j>K; continue; end
                     	pos_state_j = stateSpace(j,:,:);
                         pos_j = pos_state_j(1:2);
@@ -181,31 +197,36 @@ for i = 1:2:K
                             case (pos_i + [1, 0])*[n,1]'
                                 P_temp = (1 - P_WIND);
                                 P(i, j, action) = P_temp * Prob_Survive(pos_j(1), pos_j(2));
-                                P_IMNORMAL_TO_BASE(i, action) = P_IMNORMAL_TO_BASE(i, action) + P_temp - P(i,j,action);
+                                p_normal = p_normal + P(i,j,action);
+                                %P_IMNORMAL_TO_BASE(i, action) = P_IMNORMAL_TO_BASE(i, action) + P_temp - P(i,j,action);
                             case pos_i*[n,1]'
                                 P_temp = P_WIND * 0.25;
                                 P(i, j, action) = P_temp * Prob_Survive(pos_j(1), pos_j(2));
-                                P_IMNORMAL_TO_BASE(i, action) = P_IMNORMAL_TO_BASE(i, action) + P_temp - P(i,j,action);
+                                p_normal = p_normal + P(i,j,action);
+                                %P_IMNORMAL_TO_BASE(i, action) = P_IMNORMAL_TO_BASE(i, action) + P_temp - P(i,j,action);
                             case {(pos_i + [1, 1])*[n,1]', (pos_i + [1,-1])*[n,1]', (pos_i + [2, 0])*[n,1]'}
                                 if binarySearch(treeList,n*pos_j(1)+pos_j(2),true) ~= -1 && ~OutOfBorder(m,n,pos_j)
                                     P_temp = P_WIND * 0.25;
                                     P(i, j, action) = P_temp * Prob_Survive(pos_j(1), pos_j(2));
-                                    P_IMNORMAL_TO_BASE(i, action) = P_IMNORMAL_TO_BASE(i, action) + P_temp - P(i,j,action);
+                                    p_normal = p_normal + P(i,j,action);
+                                    %P_IMNORMAL_TO_BASE(i, action) = P_IMNORMAL_TO_BASE(i, action) + P_temp - P(i,j,action);
                                 else
-                                    P_IMNORMAL_TO_BASE(i,action) = P_IMNORMAL_TO_BASE(i,action) + P_WIND * 0.25;
+                                    %P_IMNORMAL_TO_BASE(i,action) = P_IMNORMAL_TO_BASE(i,action) + P_WIND * 0.25;
                                 end
                                 
                         end
                     end
+                    P_IMNORMAL_TO_BASE(i, action) = 1 - p_normal;
                 end
                 
             case HOVER
                 ppos = pos_i + [0, 0];
                 if binarySearch(treeList,n*ppos(1)+ppos(2),true) ~= -1 && ~OutOfBorder(m,n,ppos)
+                    p_normal = 0;
                     % Search possible states after WEST action and the wind
                     %for j = [ (i-2*n):2:(i-2*n+2+2*p),i-4:2:i+4, i+2*n-2*q:2:i+2*n+2 ] % possible reachable state indexs
-                    %for j = [ (i-4*n:2:i+4*n)]
-                    for j = [1:2:K]
+                    for j = [ (i-4*n:2:i+4*n)]
+                    %for j = [1:2:K]
                         if j<1 || j>K; continue; end
                     	pos_state_j = stateSpace(j,:,:);
                         pos_j = pos_state_j(1:2);
@@ -213,18 +234,21 @@ for i = 1:2:K
                             case (pos_i + [0, 0])*[n,1]'
                                 P_temp = (1 - P_WIND);
                                 P(i, j, action) = P_temp * Prob_Survive(pos_j(1), pos_j(2));
-                                P_IMNORMAL_TO_BASE(i, action) = P_IMNORMAL_TO_BASE(i, action) + P_temp - P(i,j,action);
+                                p_normal = p_normal + P(i,j,action);
+                                %P_IMNORMAL_TO_BASE(i, action) = P_IMNORMAL_TO_BASE(i, action) + P_temp - P(i,j,action);
                             case {(pos_i + [0, 1])*[n,1]', (pos_i + [0,-1])*[n,1]', (pos_i + [1, 0])*[n,1]', (pos_i + [-1, 0])*[n,1]'}
                                 if binarySearch(treeList,n*pos_j(1)+pos_j(2),true) ~= -1 && ~OutOfBorder(m,n,pos_j)
                                     P_temp = P_WIND * 0.25;
                                     P(i, j, action) = P_temp * Prob_Survive(pos_j(1), pos_j(2));
-                                    P_IMNORMAL_TO_BASE(i, action) = P_IMNORMAL_TO_BASE(i, action) + P_temp - P(i,j,action);
+                                    p_normal = p_normal + P(i,j,action);
+                                    %P_IMNORMAL_TO_BASE(i, action) = P_IMNORMAL_TO_BASE(i, action) + P_temp - P(i,j,action);
                                 else
-                                    P_IMNORMAL_TO_BASE(i,action) = P_IMNORMAL_TO_BASE(i,action) + P_WIND * 0.25;
+                                    %P_IMNORMAL_TO_BASE(i,action) = P_IMNORMAL_TO_BASE(i,action) + P_WIND * 0.25;
                                 end
                                 
                         end
                     end
+                    P_IMNORMAL_TO_BASE(i, action) = 1 - p_normal;
                 end                
         end
     end
