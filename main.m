@@ -30,7 +30,7 @@ clc;
 mapSize = [15, 20];
 % Set to true to generate a random map of size mapSize, else set to false 
 % to load the pre-exsisting example map
-generateRandomWorld = true;
+generateRandomWorld = false;
 
 % Plotting options
 global PLOT_POLICY PLOT_COST
@@ -94,7 +94,7 @@ K=size(stateSpace,1);
 
 
 %% Set the following to true as you progress with the files
-transitionProbabilitiesImplemented = false;
+transitionProbabilitiesImplemented = true;
 stageCostsImplemented = false;
 valueIterationImplemented = false; 
 policyIterationImplemented = false;
@@ -116,7 +116,13 @@ if transitionProbabilitiesImplemented
     % to state j if control input l is applied.
     
     % TODO: Question b)
+    tic;
     P = ComputeTransitionProbabilities(stateSpace, map);
+    toc;
+    p_std = load('exampleP.mat');
+    p_def = p_std.P-P;
+    disp('maximal difference between P_standard and P');
+    disp(max(max(max(abs(p_def)))));
 end
 
 %% Compute stage costs
