@@ -27,10 +27,10 @@ clc;
 
 %% Options
 % [M, N]
-mapSize = [15, 20];
+mapSize = [40, 40];
 % Set to true to generate a random map of size mapSize, else set to false 
 % to load the pre-exsisting example map
-generateRandomWorld = false;
+generateRandomWorld = true;
 
 % Plotting options
 global PLOT_POLICY PLOT_COST
@@ -96,7 +96,7 @@ K=size(stateSpace,1);
 %% Set the following to true as you progress with the files
 transitionProbabilitiesImplemented = true;
 stageCostsImplemented = true;
-valueIterationImplemented = false; 
+valueIterationImplemented = true; 
 policyIterationImplemented = false;
 linearProgrammingImplemented = false;
 
@@ -119,10 +119,10 @@ if transitionProbabilitiesImplemented
     tic;
     P = ComputeTransitionProbabilities(stateSpace, map);
     toc;
-    p_std = load('exampleP.mat');
-    p_def = p_std.P-P;
-    disp('maximal difference between P_standard and P');
-    disp(max(max(max(abs(p_def)))));
+%     p_std = load('exampleP.mat');
+%     p_def = p_std.P-P;
+%     disp('maximal difference between P_standard and P');
+%     disp(max(max(max(abs(p_def)))));
 end
 
 %% Compute stage costs
@@ -137,12 +137,12 @@ if stageCostsImplemented
     tic;
     G = ComputeStageCosts(stateSpace, map);
     toc;
-    G_std = load('exampleG.mat');
-    G_def = G_std.G - G;
-    disp('maximal difference between G_standard and G');
-    disp(max(max(max(abs(G_def)))));  
-    a = G_std.G(:,1);
-    b = G(:,1);
+%     G_std = load('exampleG.mat');
+%     G_def = G_std.G - G;
+%     disp('maximal difference between G_standard and G');
+%     disp(max(max(max(abs(G_def)))));  
+%     a = G_std.G(:,1);
+%     b = G(:,1);
 end
 
 %% Solve stochastic shortest path problem
@@ -152,8 +152,9 @@ if valueIterationImplemented
     disp('Solve stochastic shortest path problem with Value Iteration');
     
     % TODO: Question d)
+    tic;
     [ J_opt_vi, u_opt_ind_vi ] = ValueIteration(P, G);
-    
+    toc;
     if size(J_opt_vi,1)~=K || size(u_opt_ind_vi,1)~=K
         disp('[ERROR] the size of J and u must be K')
     end
@@ -162,7 +163,9 @@ if policyIterationImplemented
     disp('Solve stochastic shortest path problem with Policy Iteration');
     
     % TODO: Question d)
+    tic;
     [ J_opt_pi, u_opt_ind_pi ] = PolicyIteration(P, G);
+    toc;
     
     if size(J_opt_pi,1)~=K || size(u_opt_ind_pi,1)~=K
         disp('[ERROR] the size of J and u must be K')
