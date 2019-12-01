@@ -95,7 +95,7 @@ K=size(stateSpace,1);
 
 %% Set the following to true as you progress with the files
 transitionProbabilitiesImplemented = true;
-stageCostsImplemented = false;
+stageCostsImplemented = true;
 valueIterationImplemented = false; 
 policyIterationImplemented = false;
 linearProgrammingImplemented = false;
@@ -134,7 +134,15 @@ if stageCostsImplemented
     % represents the cost if we are in state i and apply control input l.
     
     % TODO: Question c)
+    tic;
     G = ComputeStageCosts(stateSpace, map);
+    toc;
+    G_std = load('exampleG.mat');
+    G_def = G_std.G - G;
+    disp('maximal difference between G_standard and G');
+    disp(max(max(max(abs(G_def)))));  
+    a = G_std.G(:,1);
+    b = G(:,1);
 end
 
 %% Solve stochastic shortest path problem
