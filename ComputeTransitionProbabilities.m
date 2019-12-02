@@ -1,4 +1,4 @@
-function [P, idxList] = ComputeTransitionProbabilities( stateSpace, map)
+function P = ComputeTransitionProbabilities( stateSpace, map)
 %COMPUTETRANSITIONPROBABILITIES Compute transition probabilities.
 % 	Compute the transition probabilities between all states in the state
 %   space for all control inputs.
@@ -57,13 +57,6 @@ P = zeros(K,K,L);
 P_IMNORMAL_TO_BASE = zeros(K,L);
 %% COMPUTE ODD SUB TRANSITION MATRIX FIRST
 for i = 1:2:K
-    % Possible position can be reached from state i stateSpace(i) = (i,0/1)
-    %                        I
-    %                      F G H
-    %                    A B i D E 
-    %                      J K L
-    %                        M
-    
     pos_i = stateSpace(i,1:2);
     for action = [WEST, SOUTH, NORTH, EAST, HOVER]
         % Check if this action is allowed ( NOT HITTING A TREE AND
