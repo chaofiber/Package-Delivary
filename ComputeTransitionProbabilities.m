@@ -56,6 +56,7 @@ PICK_UP_INDEX = find(ismember(stateSpace,[x,y,1],'rows'));
 P = zeros(K,K,L);
 P_IMNORMAL_TO_BASE = zeros(K,L);
 %% COMPUTE ODD SUB TRANSITION MATRIX FIRST
+tic;
 for i = 1:2:K
     pos_i = stateSpace(i,1:2);
     for action = [WEST, SOUTH, NORTH, EAST, HOVER]
@@ -78,6 +79,7 @@ for i = 1:2:K
                         if j ~= -1 % NOT A TREE
                             P_temp = P_WIND*0.25; 
                             P(i, j, action) = P_temp*Prob_Survive(pos_j(1), pos_j(2));
+                            P(i+1, j+1, action) = P(i, j, action);
                             p_normal = p_normal + P(i,j,action);
                         end
                     end
@@ -85,6 +87,7 @@ for i = 1:2:K
                 % LUCKY! NO WIND!!! STAY WHERE YOU ARE!
                 P_temp = 1 - P_WIND;
                 P(i,j_temp,action) = P_temp*Prob_Survive(ppos(1), ppos(2));
+                P(i+1, j_temp+1, action) = P(i, j_temp, action);
                 p_normal = p_normal + P(i,j_temp,action);
                 % OTHERWISE, GO BACK TO BASE! -.-
                 P_IMNORMAL_TO_BASE(i, action) = 1 - p_normal;
@@ -95,7 +98,7 @@ for i = 1:2:K
 
     
 end
-
+toc;
 % COPY TO THE EVEN INDEX SUB TRANSITION MATRIX
 % TO DO: 1. copy the odd index pair to the even index pair (i,j,u) 
 % 2. consider following cases: 
@@ -104,12 +107,13 @@ end
 % from FREE WITH PACKAGE to DROPOFF
 % IT IS IMPOSSIBLE THAT ONE IS IN PICKUP WITHOUT A PACKAGE. 
 % Or just add P(i+1,j+1) after each line above in the odd case.
-
-for i = 2:2:K
-    for action = [WEST, SOUTH, NORTH, EAST, HOVER]
-        P(i,2:2:K,action) = P(i-1,1:2:K,action);
-    end
-end
+tic;
+% for i = 2:2:K
+%     for action = [WEST, SOUTH, NORTH, EAST, HOVER]
+%         P(i,2:2:K,action) = P(i-1,1:2:K,action);
+%     end
+% end
+toc;
 % FROM FREE WITHOUT PACKAGE to PICKUP  PICK_UP_INDEX: even
 %for i = [Reachable(PICK_UP_INDEX) ]
 P(1:2:K, PICK_UP_INDEX, :) = P(1:2:K, PICK_UP_INDEX-1,:);
@@ -123,15 +127,17 @@ for i = 2:2:K
 end
 
 % UPDATE THE PROB TO BASE
+tic;
 for i = 1:2:K
     for action = [WEST, SOUTH, NORTH, EAST, HOVER]
-        P(i,BASE_STATE_INDEX,action) = P(i, BASE_STATE_INDEX,action) + P_IMNORMAL_TO_BASE(i, action);
+        P(i,BASE_STATE_INDEX,action) = P(i, BASE_STATE_INDEX,action) + P_IMNORMAL_TO_BASE(i,action);
     end
 end
 % FROM FREE WITH PACKAGE TO DROPOFF: DON'T HAVE TO CHANGE!!!
 % FROM TERMINAL_STATE_INDEX: STAY THERE!
 P(TERMINAL_STATE_INDEX, :, :) = 0;
 P(TERMINAL_STATE_INDEX, TERMINAL_STATE_INDEX, :) = 1;
+toc;
 end
 
 function shooterList = findShooter(map)
