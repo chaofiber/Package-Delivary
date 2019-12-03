@@ -56,7 +56,6 @@ PICK_UP_INDEX = find(ismember(stateSpace,[x,y,1],'rows'));
 P = zeros(K,K,L);
 P_IMNORMAL_TO_BASE = zeros(K,L);
 %% COMPUTE ODD SUB TRANSITION MATRIX FIRST
-tic;
 for i = 1:2:K
     pos_i = stateSpace(i,1:2);
     for action = [WEST, SOUTH, NORTH, EAST, HOVER]
@@ -98,7 +97,6 @@ for i = 1:2:K
 
     
 end
-toc;
 % COPY TO THE EVEN INDEX SUB TRANSITION MATRIX
 % TO DO: 1. copy the odd index pair to the even index pair (i,j,u) 
 % 2. consider following cases: 
@@ -107,13 +105,12 @@ toc;
 % from FREE WITH PACKAGE to DROPOFF
 % IT IS IMPOSSIBLE THAT ONE IS IN PICKUP WITHOUT A PACKAGE. 
 % Or just add P(i+1,j+1) after each line above in the odd case.
-tic;
 % for i = 2:2:K
 %     for action = [WEST, SOUTH, NORTH, EAST, HOVER]
 %         P(i,2:2:K,action) = P(i-1,1:2:K,action);
 %     end
 % end
-toc;
+
 % FROM FREE WITHOUT PACKAGE to PICKUP  PICK_UP_INDEX: even
 %for i = [Reachable(PICK_UP_INDEX) ]
 P(1:2:K, PICK_UP_INDEX, :) = P(1:2:K, PICK_UP_INDEX-1,:);
@@ -127,7 +124,6 @@ for i = 2:2:K
 end
 
 % UPDATE THE PROB TO BASE
-tic;
 for i = 1:2:K
     for action = [WEST, SOUTH, NORTH, EAST, HOVER]
         P(i,BASE_STATE_INDEX,action) = P(i, BASE_STATE_INDEX,action) + P_IMNORMAL_TO_BASE(i,action);
@@ -137,7 +133,6 @@ end
 % FROM TERMINAL_STATE_INDEX: STAY THERE!
 P(TERMINAL_STATE_INDEX, :, :) = 0;
 P(TERMINAL_STATE_INDEX, TERMINAL_STATE_INDEX, :) = 1;
-toc;
 end
 
 function shooterList = findShooter(map)

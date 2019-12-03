@@ -30,7 +30,7 @@ function [ J_opt, u_opt_ind ] = ValueIteration(P, G)
 %       	input for each element of the state space. Mapping of the
 %       	terminal state is arbitrary (for example: HOVER).
 global K HOVER NORTH WEST EAST SOUTH
-global L
+global L TERMINAL_STATE_INDEX
 %% INITIALIZATION
 L = 5;
 J_opt = zeros(K,1);
@@ -115,6 +115,8 @@ while 1
     end
     J_opt_old = J_opt;
 end
+
+u_opt_ind(TERMINAL_STATE_INDEX) = HOVER;
 %% Handle terminal state
 % Do yo need to do something with the teminal state before starting policy
 % iteration ?
