@@ -54,11 +54,8 @@ for action = [HOVER, EAST, NORTH, WEST, SOUTH]
     b = [b;
          G(row_col_idx,action)];
 end
-[J_opt, FVAL, EXITFLAG] = linprog(c,A,b);
+[J_opt, ~, ~] = linprog(c,A,b);
 J_opt = [J_opt(1:TERMINAL_STATE_INDEX-1,:);0;J_opt(TERMINAL_STATE_INDEX:end,:)];
-disp(size(J_opt));
-disp(FVAL);
-disp(EXITFLAG);
 for i = 1:K
     for action = [HOVER, EAST, NORTH, WEST, SOUTH]
         Q(action) = G(i, action) + P(i, :, action)*J_opt;
@@ -66,5 +63,5 @@ for i = 1:K
     [~, idx] = min(Q);
     u_opt_ind(i) = idx;
 end
-
+u_opt_ind(TERMINAL_STATE_INDEX) = HOVER;
 
