@@ -32,29 +32,45 @@ function [ J_opt, u_opt_ind ] = PolicyIteration( P, G )
 
 global K HOVER 
 global NORTH SOUTH EAST WEST
+global TERMINAL_STATE_INDEX
 
 %% Initialization
 % intial policy: in all states execute input NORTH -- improper
-u_opt_ind = ones(K,1);  
+u_opt_ind = HOVER * ones(K,1);  
 J_opt = zeros(K,1);
 %u_opt_ind=[1;1;3;3;3;3;3;3;3;3;3;3;3;3;3;3;3;3;3;3;3;3;3;3;2;2;2;2;2;2;2;2;2;3;2;2;1;1;1;1;1;1;1;1;3;1;3;1;3;3;3;3;3;3;3;3;2;2;2;2;2;2;2;2;2;2;2;2;2;2;2;2;1;1;1;1;1;1;1;1;1;1;3;1;3;1;3;1;3;1;3;2;2;2;2;2;2;2;2;2;4;4;4;4;1;1;1;1;1;1;1;1;1;1;1;1;3;1;3;1;3;4;2;2;2;2;2;2;2;4;2;2;4;4;4;4;1;1;1;1;1;4;1;4;1;4;1;1;1;1;3;4;3;4;2;4;4;4;4;4;1;1;1;4;4;4;1;4;1;4;1;1;1;4;3;4;3;4;2;2;1;1;3;3;1;1;3;4;3;4;3;4;1;1;1;1;1;1;3;4;3;4;3;2;1;1;3;3;1;1;1;4;1;2;1;2;1;1;1;1;1;1;3;4;3;4;3;2;3;3;3;3;3;3;2;2;1;1;3;4;4;2;1;1;3;4;3;4;3;2;3;3;3;3;2;2;2;2;1;1;3;4;3;2;1;1;1;4;3;4;3;2;5;3;2;3;2;3;2;3;2;2;2;2;2;2;1;1;3;4;3;2;1;1;1;4;1;4;1;2;1;2;1;2;1;2;4;3;2;2;2;2;2;2;2;2;2;2;2;2;1;1;1;4;1;2;1;2;1;2;1;1;1;1;1;4;1;4;1;4;1;2;1;2;1;2;4;2;4;2;4;4;4;4;2;2;2;2;2;2;1;1;1;4;4;4;4;2;4;2;1;1;1;1;1;4;1;4;1;4;1;4;4;2;4;2;4;2;4;2;4;4;4;4;4;4;2;2;2;2;1;1;1;4;1;4;1;2;1;2;1;1;1;1;1;1;1;4;1;4;4;4;4;4;4;2;4;2;4;2;4;4;4;4;4;4;4;4;2;2;1;4;1;4;1;4;1;4;1;1;1;1;1;1;4;4;4;4;4;4;4;4;4;4;4;2;2;2;2;2;4;4;4;4;4;4];
 
-max_val_iter = 200;
+max_val_iter = 100;
 %max_pol_iter = 10000;
 
 %% Calculate optimal policy
 
-pre_value = J_opt;
+%pre_value = J_opt;
 pre_policy = u_opt_ind;
+
 while 1
-    new_value = Cal_Value(pre_policy, pre_value, max_val_iter, P, G);
+%     new_value = Cal_Value(pre_policy, pre_value, max_val_iter, P, G);
+P_pol = zeros(K, K);
+G_pol = zeros(K, 1);
+dia_val = ones(1,K - 1);
+
+    for i=1:1:K
+        P_pol(i,:) = P(i,:,pre_policy(i));
+        G_pol(i) = G(i,pre_policy(i));
+    end
+    P_pol(TERMINAL_STATE_INDEX,:)=[];
+    P_pol(:,TERMINAL_STATE_INDEX)=[];
+    G_pol(TERMINAL_STATE_INDEX,:)=[];
+    
+    new_value = (diag(dia_val) - P_pol)\ G_pol;
+    new_value = [new_value(1:TERMINAL_STATE_INDEX - 1);0;new_value(TERMINAL_STATE_INDEX:end)];
     new_policy = Cal_Policy(pre_policy, new_value, P, G);
     
     if isequal(new_policy,pre_policy)
         break;
     end
     pre_policy = new_policy;
-    pre_value = new_value;
+    %pre_value = new_value;
 end
 
 J_opt = new_value;
@@ -63,7 +79,7 @@ u_opt_ind = new_policy;
 %% Handle terminal state
 % Do yo need to do something with the teminal state before starting policy
 % iteration?
-global TERMINAL_STATE_INDEX
+
 % IMPORTANT: You can use the global variable TERMINAL_STATE_INDEX computed
 % in the ComputeTerminalStateIndex.m file (see main.m)
 
