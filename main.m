@@ -27,7 +27,7 @@ clc;
 
 %% Options
 % [M, N]
-mapSize = [40, 40];
+mapSize = [15, 20];
 % Set to true to generate a random map of size mapSize, else set to false 
 % to load the pre-exsisting example map
 generateRandomWorld = true;
@@ -98,7 +98,7 @@ transitionProbabilitiesImplemented = true;
 stageCostsImplemented = true;
 valueIterationImplemented = true; 
 policyIterationImplemented = false;
-linearProgrammingImplemented = false;
+linearProgrammingImplemented = true;
 
 %% Compute the terminal state index
 global TERMINAL_STATE_INDEX
@@ -175,7 +175,9 @@ if linearProgrammingImplemented
     disp('Solve stochastic shortest path problem with Linear Programming');
     
     % TODO: Question d)
+    tic;
     [ J_opt_lp, u_opt_ind_lp ] = LinearProgramming(P, G);
+    toc;
     
     if size(J_opt_lp,1)~=K || size(u_opt_ind_lp,1)~=K
         disp('[ERROR] the size of J and u must be K')
@@ -195,4 +197,10 @@ if linearProgrammingImplemented
 end
 
 %% Terminated
+disp('value difference between vi and lp');
+disp(max(abs(J_opt_vi-J_opt_lp)));
+disp('value difference between pi and lp');
+disp(max(abs(J_opt_pi-J_opt_lp)));
+disp('value difference between pi and vi');
+disp(max(abs(J_opt_pi-J_opt_vi)));
 disp('Terminated');
