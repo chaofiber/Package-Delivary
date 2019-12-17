@@ -39,7 +39,10 @@ L = 5;
 
 shooterList = findShooter(map);
 Prob_Survive = Survive(shooterList, stateSpace);
+
+% find the state index of every cell in the map
 idxList = MaptoIndex(stateSpace);
+% define the change of coordinates only by inputs or winds of different direction
 Direction = zeros(5,2);
 Direction(EAST,:) = [1, 0];
 Direction(WEST,:) = [-1,0];
@@ -50,26 +53,18 @@ Direction(HOVER,:) = [0,0];
 P_IMNORMAL_TO_BASE = -1*ones(K,L); % IF P_IMNORMAL_TO_BASE(i,u) = -1, then such (i,u) pair is not allowed.
 G = Inf(K,L);
 %% COMPUTE ODD SUB TRANSITION MATRIX FIRST
-for i = 1:2:K
-    % Possible position can be reached from state i stateSpace(i) = (i,0/1)
-    %                        I
-    %                      F G H
-    %                    A B i D E 
-    %                      J K L
-    %                        M
-    
+for i = 1:2:K   
     pos_i = stateSpace(i,1:2);
     for action = [WEST, SOUTH, NORTH, EAST, HOVER]
         % Check if this action is allowed ( NOT HITTING A TREE AND
         % NOT OUT OF BORDER !!!)
-        % ppos: the cell the drone is supposed to be in if no wind
-        % happens
+        % ppos: the cell the drone is supposed to be in if no wind happens
         ppos = pos_i + Direction(action,:);
         if ~OutOfBorder(m,n,ppos)
             j_temp = idxList(ppos(1), ppos(2));
             if j_temp ~= -1
-                % This action is valid only if it neither hit the
-                % tree nor hit the border
+                % This action is valid only if it neither hits the
+                % tree nor hits the border
                 p_normal = 0;
                 % WIND COMES!!!!!
                 for wind = [WEST, SOUTH, NORTH, EAST]   
@@ -77,15 +72,15 @@ for i = 1:2:K
                     if ~OutOfBorder(m,n,pos_j)
                         j = idxList(pos_j(1), pos_j(2));
                         if j ~= -1 % NOT A TREE
-                            P_temp = P_WIND*0.25; 
+                            P_temp = P_WIND * 0.25; 
                             p_normal = p_normal + P_temp*Prob_Survive(pos_j(1), pos_j(2));
                         end
                     end
                 end
                 % LUCKY! NO WIND!!! STAY WHERE YOU ARE!
                 P_temp = 1 - P_WIND;
-                p_normal = p_normal + P_temp*Prob_Survive(ppos(1), ppos(2));
-                % OTHERWISE, GO BACK TO BASE! -.-
+                p_normal = p_normal + P_temp * Prob_Survive(ppos(1), ppos(2));
+                % OTHERWISE, GO BACK TO BASE! -.- CRASH!
                 P_IMNORMAL_TO_BASE(i, action) = 1 - p_normal;
             end
             
@@ -96,7 +91,7 @@ for i = 1:2:K
 end
 
 %% COMPUTE STAGE COST FUNCTION: 
-% G(i,u) = 1 + P_IMNORMAL_TO_BASE(i,u)*10;
+% G(i,u) = 1 + P_IMNORMAL_TO_BASE(i,u) * (Nc-1);
 % SPECIAL CASE:
 % 1. G(TERMINAL_STATE_INDEX,:) = 0 % FROM TERMINATION, YOU ARE DONE!!!
 % 2. G(i,NOT ALLOABLW ACTION) = Inf
@@ -159,7 +154,8 @@ end
 end
 
 function indexList = MaptoIndex(stateSpace)
-% return a matrix (m * n), indexList(i,j) = stateIndex
+% return a matrix (m * n), indexList(i,j) = stateIndex of position(i,j),
+% indexList(i,j)= -1 means there is a tree in this position
 global K m n
 indexList = -1*ones(m,n);
 for i = 1:2:K
