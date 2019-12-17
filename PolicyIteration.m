@@ -31,51 +31,50 @@ function [ J_opt, u_opt_ind ] = PolicyIteration( P, G )
 %       	terminal state is arbitrary (for example: HOVER).
 
 global K HOVER NORTH SOUTH EAST WEST
-global P1 G1
 global TERMINAL_STATE_INDEX
 
 %% Initialization
-% intial policy: ALL HOVER
-u_opt_ind = HOVER * ones(K,1);  
+% intial policy: ALL HOVER, this is a proper policy.
+
+L = 5;
+u_opt_ind = HOVER * ones(K-1,1);  
 J_opt = zeros(K,1);
-
-
-P1 = P;
-G1 = G;
-%max_val_iter = 100;
-%max_pol_iter = 10000;
-
-%% Calculate optimal policy
-
-%pre_value = J_opt;
-pre_policy = u_opt_ind;
+u_old = u_opt_ind;
 I = eye(K-1);
-while 1
-%     new_value = Cal_Value(pre_policy, pre_value, max_val_iter, P, G);
-P_pol = zeros(K, K);
-G_pol = zeros(K, 1);
+P_pol = zeros(K-1, K-1);
+G_pol = zeros(K-1, 1);
+Q = zeros(L,1);
 
-    for i=1:1:K
-        P_pol(i,:) = P1(i,:,pre_policy(i));
-        G_pol(i) = G1(i,pre_policy(i));
+P(TERMINAL_STATE_INDEX,:,:) = [ ];
+P(:, TERMINAL_STATE_INDEX,:) = [ ];
+G(TERMINAL_STATE_INDEX,:) = [ ];
+
+while 1
+    for i=1:K-1
+        P_pol(i,:) = P(i,:,u_old(i));
+        G_pol(i) = G(i,u_old(i));
     end
-    P_pol(TERMINAL_STATE_INDEX,:)=[];
-    P_pol(:,TERMINAL_STATE_INDEX)=[];
-    G_pol(TERMINAL_STATE_INDEX,:)=[];
     
-    new_value = (I - P_pol)\ G_pol;
-    new_value = [new_value(1:TERMINAL_STATE_INDEX - 1);0;new_value(TERMINAL_STATE_INDEX:end)];
-    new_policy = Cal_Policy(pre_policy, new_value);
+%     J_opt = (I - P_pol)\ G_pol;
+    D = I - P_pol;
+    J_opt = D \ G_pol;
+    % COMPUTE NEW POLICY
+    for i = 1:K-1
+        for action = [HOVER, EAST, NORTH, WEST, SOUTH]
+            Q(action) = G(i, action) + P(i, :, action)*J_opt;
+        end
+        [~, idx] = min(Q);
+        u_opt_ind(i) = idx;
+    end
     
-    if isequal(new_policy,pre_policy)
+    if isequal(u_opt_ind,u_old)
         break;
     end
-    pre_policy = new_policy;
-    %pre_value = new_value;
+    u_old = u_opt_ind;
 end
 
-J_opt = new_value;
-u_opt_ind = new_policy;
+J_opt = [J_opt(1:TERMINAL_STATE_INDEX-1,:);0;J_opt(TERMINAL_STATE_INDEX:end,:)];
+u_opt_ind = [u_opt_ind(1:TERMINAL_STATE_INDEX-1);HOVER;u_opt_ind(TERMINAL_STATE_INDEX:end)];
 
 %% Handle terminal state
 % Do yo need to do something with the teminal state before starting policy
@@ -86,42 +85,4 @@ u_opt_ind = new_policy;
 
 end
 
-function PolicyImprove = Cal_Policy(policy_now, value_now)
-global NORTH SOUTH EAST WEST HOVER K
-global P1 G1
-% Improve the policy by minimizing the value
-L = 5;
-PolicyImprove = policy_now;
-cost_u = zeros(L,1);
 
-for i = 1:1:K
-    for action = [NORTH,SOUTH,EAST,WEST,HOVER]
-        cost_u(action) = G1(i, action) + P1(i,:,action) * value_now;
-    end
-    [~, ind] = min(cost_u);
-    PolicyImprove(i)= ind;
-end
-
-end
-
-function Value_now = Cal_Value(policy_now, value_pre, max_iter)
-global K
-global P1 G1
-% Calculate the value for current policy by iteration
-iter = 0;
-Value_now = value_pre;
-while 1   
-    for i = 1:1:K
-        Value_now(i,1) = G1(i,policy_now(i))+ P1(i,:,policy_now(i))* value_pre;
-    end
-   
-    % Define the condition to end iteration
-    if max(abs(Value_now-value_pre)) < 1e-6  || iter > max_iter
-        break;
-    end
-    
-    iter = iter + 1;
-    value_pre = Value_now;
-end
-
-end
