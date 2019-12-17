@@ -39,13 +39,11 @@ global TERMINAL_STATE_INDEX
 u_opt_ind = HOVER * ones(K,1);  
 J_opt = zeros(K,1);
 
-<<<<<<< HEAD
-=======
+
 P1 = P;
 G1 = G;
 %max_val_iter = 100;
 %max_pol_iter = 10000;
->>>>>>> d3a53fec37bd5cd6907db31bccb2051ded4cb64d
 
 %% Calculate optimal policy
 
