@@ -30,8 +30,8 @@ function [ J_opt, u_opt_ind ] = PolicyIteration( P, G )
 %       	input for each element of the state space. Mapping of the
 %       	terminal state is arbitrary (for example: HOVER).
 
-global K HOVER 
-global NORTH SOUTH EAST WEST
+global K HOVER NORTH SOUTH EAST WEST
+global P1 G1
 global TERMINAL_STATE_INDEX
 
 %% Initialization
@@ -39,6 +39,13 @@ global TERMINAL_STATE_INDEX
 u_opt_ind = HOVER * ones(K,1);  
 J_opt = zeros(K,1);
 
+<<<<<<< HEAD
+=======
+P1 = P;
+G1 = G;
+%max_val_iter = 100;
+%max_pol_iter = 10000;
+>>>>>>> d3a53fec37bd5cd6907db31bccb2051ded4cb64d
 
 %% Calculate optimal policy
 
@@ -51,8 +58,8 @@ P_pol = zeros(K, K);
 G_pol = zeros(K, 1);
 
     for i=1:1:K
-        P_pol(i,:) = P(i,:,pre_policy(i));
-        G_pol(i) = G(i,pre_policy(i));
+        P_pol(i,:) = P1(i,:,pre_policy(i));
+        G_pol(i) = G1(i,pre_policy(i));
     end
     P_pol(TERMINAL_STATE_INDEX,:)=[];
     P_pol(:,TERMINAL_STATE_INDEX)=[];
@@ -60,7 +67,7 @@ G_pol = zeros(K, 1);
     
     new_value = (I - P_pol)\ G_pol;
     new_value = [new_value(1:TERMINAL_STATE_INDEX - 1);0;new_value(TERMINAL_STATE_INDEX:end)];
-    new_policy = Cal_Policy(pre_policy, new_value, P, G);
+    new_policy = Cal_Policy(pre_policy, new_value);
     
     if isequal(new_policy,pre_policy)
         break;
@@ -81,8 +88,9 @@ u_opt_ind = new_policy;
 
 end
 
-function PolicyImprove = Cal_Policy(policy_now, value_now, P, G)
+function PolicyImprove = Cal_Policy(policy_now, value_now)
 global NORTH SOUTH EAST WEST HOVER K
+global P1 G1
 % Improve the policy by minimizing the value
 L = 5;
 PolicyImprove = policy_now;
@@ -90,7 +98,7 @@ cost_u = zeros(L,1);
 
 for i = 1:1:K
     for action = [NORTH,SOUTH,EAST,WEST,HOVER]
-        cost_u(action) = G(i, action) + P(i,:,action) * value_now;
+        cost_u(action) = G1(i, action) + P1(i,:,action) * value_now;
     end
     [~, ind] = min(cost_u);
     PolicyImprove(i)= ind;
@@ -98,14 +106,15 @@ end
 
 end
 
-function Value_now = Cal_Value(policy_now, value_pre, max_iter, P, G)
+function Value_now = Cal_Value(policy_now, value_pre, max_iter)
 global K
+global P1 G1
 % Calculate the value for current policy by iteration
 iter = 0;
 Value_now = value_pre;
 while 1   
     for i = 1:1:K
-        Value_now(i,1) = G(i,policy_now(i))+ P(i,:,policy_now(i))* value_pre;
+        Value_now(i,1) = G1(i,policy_now(i))+ P1(i,:,policy_now(i))* value_pre;
     end
    
     % Define the condition to end iteration
