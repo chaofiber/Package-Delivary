@@ -32,34 +32,30 @@ function [ J_opt, u_opt_ind ] = LinearProgramming(P, G)
 
 global K HOVER EAST WEST NORTH SOUTH L
 
-%% Handle terminal state
-% Do yo need to do something with the teminal state before starting policy
-% iteration ?
-global TERMINAL_STATE_INDEX 
-% IMPORTANT: You can use the global variable TERMINAL_STATE_INDEX computed
-% in the ComputeTerminalStateIndex.m file (see main.m)
 
 %% INITIALIZATION
-
-c = -1*ones(K-1,1);
+c = -1 * ones(K-1,1);
 L = 5;
 Q = zeros(L,1);
-u_opt_ind = -1*ones(K-1,1);
-G(isinf(G)) = 100000;
+u_opt_ind = -1 * ones(K-1,1);
 b = [ ];
 A = [ ]; 
 I = eye(K-1);
 
+%% Handle terminal state
+global TERMINAL_STATE_INDEX 
+
+% We need to get rid of those rows and columns related to the terminal state 
+% in P and G in computation since its stage cost is zero
 P(TERMINAL_STATE_INDEX,:,:) = [ ];
 P(:, TERMINAL_STATE_INDEX,:) = [ ];
 G(TERMINAL_STATE_INDEX,:) = [ ];
 
 %% LINEAR PROGRAMMING
-% Is some (state, action) is not allowed, i.e. G(i,action) = Inf. We don't
+% If some (state, action) is not allowed, i.e. G(i,action) = Inf. We don't
 % need to add this constraint.
 for action = [HOVER, EAST, NORTH, WEST, SOUTH]
     row = G(:,action) ~= Inf;
-    %row(TERMINAL_STATE_INDEX) = false;
     A = [A;
          I(row,:) - P(row,:,action)];
     b = [b;
@@ -77,6 +73,7 @@ for i = 1:K-1
     u_opt_ind(i) = idx;
 end
 
+% add back the policy and cost-to-go of terminal state
 J_opt = [J_opt(1:TERMINAL_STATE_INDEX-1,:);0;J_opt(TERMINAL_STATE_INDEX:end,:)];
 u_opt_ind = [u_opt_ind(1:TERMINAL_STATE_INDEX-1);HOVER;u_opt_ind(TERMINAL_STATE_INDEX:end)];
 
