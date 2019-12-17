@@ -35,24 +35,20 @@ global NORTH SOUTH EAST WEST
 global TERMINAL_STATE_INDEX
 
 %% Initialization
-% intial policy: in all states execute input NORTH -- improper
+% intial policy: ALL HOVER
 u_opt_ind = HOVER * ones(K,1);  
 J_opt = zeros(K,1);
-%u_opt_ind=[1;1;3;3;3;3;3;3;3;3;3;3;3;3;3;3;3;3;3;3;3;3;3;3;2;2;2;2;2;2;2;2;2;3;2;2;1;1;1;1;1;1;1;1;3;1;3;1;3;3;3;3;3;3;3;3;2;2;2;2;2;2;2;2;2;2;2;2;2;2;2;2;1;1;1;1;1;1;1;1;1;1;3;1;3;1;3;1;3;1;3;2;2;2;2;2;2;2;2;2;4;4;4;4;1;1;1;1;1;1;1;1;1;1;1;1;3;1;3;1;3;4;2;2;2;2;2;2;2;4;2;2;4;4;4;4;1;1;1;1;1;4;1;4;1;4;1;1;1;1;3;4;3;4;2;4;4;4;4;4;1;1;1;4;4;4;1;4;1;4;1;1;1;4;3;4;3;4;2;2;1;1;3;3;1;1;3;4;3;4;3;4;1;1;1;1;1;1;3;4;3;4;3;2;1;1;3;3;1;1;1;4;1;2;1;2;1;1;1;1;1;1;3;4;3;4;3;2;3;3;3;3;3;3;2;2;1;1;3;4;4;2;1;1;3;4;3;4;3;2;3;3;3;3;2;2;2;2;1;1;3;4;3;2;1;1;1;4;3;4;3;2;5;3;2;3;2;3;2;3;2;2;2;2;2;2;1;1;3;4;3;2;1;1;1;4;1;4;1;2;1;2;1;2;1;2;4;3;2;2;2;2;2;2;2;2;2;2;2;2;1;1;1;4;1;2;1;2;1;2;1;1;1;1;1;4;1;4;1;4;1;2;1;2;1;2;4;2;4;2;4;4;4;4;2;2;2;2;2;2;1;1;1;4;4;4;4;2;4;2;1;1;1;1;1;4;1;4;1;4;1;4;4;2;4;2;4;2;4;2;4;4;4;4;4;4;2;2;2;2;1;1;1;4;1;4;1;2;1;2;1;1;1;1;1;1;1;4;1;4;4;4;4;4;4;2;4;2;4;2;4;4;4;4;4;4;4;4;2;2;1;4;1;4;1;4;1;4;1;1;1;1;1;1;4;4;4;4;4;4;4;4;4;4;4;2;2;2;2;2;4;4;4;4;4;4];
 
-max_val_iter = 100;
-%max_pol_iter = 10000;
 
 %% Calculate optimal policy
 
 %pre_value = J_opt;
 pre_policy = u_opt_ind;
-
+I = eye(K-1);
 while 1
 %     new_value = Cal_Value(pre_policy, pre_value, max_val_iter, P, G);
 P_pol = zeros(K, K);
 G_pol = zeros(K, 1);
-dia_val = ones(1,K - 1);
 
     for i=1:1:K
         P_pol(i,:) = P(i,:,pre_policy(i));
@@ -62,7 +58,7 @@ dia_val = ones(1,K - 1);
     P_pol(:,TERMINAL_STATE_INDEX)=[];
     G_pol(TERMINAL_STATE_INDEX,:)=[];
     
-    new_value = (diag(dia_val) - P_pol)\ G_pol;
+    new_value = (I - P_pol)\ G_pol;
     new_value = [new_value(1:TERMINAL_STATE_INDEX - 1);0;new_value(TERMINAL_STATE_INDEX:end)];
     new_policy = Cal_Policy(pre_policy, new_value, P, G);
     
