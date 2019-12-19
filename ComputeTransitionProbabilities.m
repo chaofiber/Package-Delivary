@@ -31,7 +31,7 @@ global NORTH SOUTH EAST WEST HOVER
 global K TERMINAL_STATE_INDEX
 
 %% INITILIZATION
-global m n L
+global m n 
 [m, n] = size(map);
 L = 5;
 % find the position of all shooters and compute a probability matrix of

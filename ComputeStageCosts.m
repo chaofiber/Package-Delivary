@@ -32,17 +32,16 @@ global K
 global TERMINAL_STATE_INDEX
     
 %% INITILIZATION
-% find the treeList (number of tree * 1)
-global m n
 [m, n] = size(map);
 L = 5;
 
 shooterList = findShooter(map);
 Prob_Survive = Survive(shooterList, stateSpace);
 
-% find the state index of every cell in the map
+% DEFINE THE MAP_TO_INDEX MATRIX
 idxList = MaptoIndex(stateSpace);
-% define the change of coordinates only by inputs or winds of different direction
+
+% DIFINE WIND DIRECTIONS
 Direction = zeros(5,2);
 Direction(EAST,:) = [1, 0];
 Direction(WEST,:) = [-1,0];
@@ -52,7 +51,7 @@ Direction(HOVER,:) = [0,0];
 
 P_IMNORMAL_TO_BASE = -1*ones(K,L); % IF P_IMNORMAL_TO_BASE(i,u) = -1, then such (i,u) pair is not allowed.
 G = Inf(K,L);
-%% COMPUTE ODD SUB TRANSITION MATRIX FIRST
+%% COMPUTE P_IMNORMAL_TO_BASE MATRIX
 for i = 1:2:K   
     pos_i = stateSpace(i,1:2);
     for action = [WEST, SOUTH, NORTH, EAST, HOVER]
@@ -97,13 +96,13 @@ end
 % 2. G(i,NOT ALLOABLW ACTION) = Inf
 for i = 1:2:K
     for action = [WEST, SOUTH, NORTH, EAST, HOVER]
-        if P_IMNORMAL_TO_BASE(i,action) ~= -1
+        if P_IMNORMAL_TO_BASE(i,action) ~= -1 % This action is allowed
             G(i,action) = 1 + P_IMNORMAL_TO_BASE(i,action) * (Nc - 1);
         end
     end
 end
 
-% UPDATE EVEN CASES
+% UPDATE EVEN CASES AND TERMINAL_STATE
 G(2:2:K,:) = G(1:2:K,:);
 G(TERMINAL_STATE_INDEX,:) = 0;
 end

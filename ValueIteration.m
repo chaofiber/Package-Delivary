@@ -30,7 +30,7 @@ function [ J_opt, u_opt_ind ] = ValueIteration(P, G)
 %       	input for each element of the state space. Mapping of the
 %       	terminal state is arbitrary (for example: HOVER).
 global K HOVER NORTH WEST EAST SOUTH
-global L TERMINAL_STATE_INDEX
+global TERMINAL_STATE_INDEX
 %% INITIALIZATION
 L = 5;
 J_opt = zeros(K,1);
@@ -38,7 +38,6 @@ Q = zeros(L,1);
 u_opt_ind = -1 * ones(K,1);
 
 %% NAIVE VALUE ITERATION
-% V0 --> u0 --> V1 --> u1 -->....
 J_opt_old = J_opt;
 ite = 0;
 while 1
@@ -47,25 +46,22 @@ while 1
         for action = [NORTH, WEST, EAST, SOUTH, HOVER]
             Q(action) = G(i, action) + P(i, :, action)*J_opt_old;
         end
-        [min_Q, idx] = min(Q);
-        % UPDATE POLICY
-        u_opt_ind(i) = idx;
-        % UPDATE COST TO GO
-        J_opt(i) = min_Q;
+        [J_opt(i), u_opt_ind(i)] = min(Q);
     end
     % TERMINATION CONDITION
     if max(abs(J_opt - J_opt_old)) < 1e-5
-        disp('Number of Iteration of Naive VI');
+        disp('Number of Iteration of VI');
         disp(ite);
         break;
     end
     J_opt_old = J_opt;
 end
 
-%% Gauss-Seidal VALUE ITERATION
-% V0 --> u0 --> V1 --> u1 -->....
-% ite = 0;
+u_opt_ind(TERMINAL_STATE_INDEX) = HOVER;
 
+
+%% Gauss-Seidal VALUE ITERATION
+% ite = 0;
 % while 1
 %     ite = ite + 1;
 %     maxdif = 0;
@@ -87,11 +83,6 @@ end
 %         break;
 %     end
 % end
-
-
-%% Handle terminal state
-
-global TERMINAL_STATE_INDEX
-u_opt_ind(TERMINAL_STATE_INDEX) = HOVER;
+% u_opt_ind(TERMINAL_STATE_INDEX) = HOVER;
 
 end

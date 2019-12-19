@@ -1,4 +1,4 @@
-mapSize = [30, 30];
+mapSize = [8, 8];
 ep = 10;
 t_vi = zeros(ep,1);
 t_pi = zeros(ep,1);
@@ -40,8 +40,8 @@ HOVER = 5;
 %% Set the following to true as you progress with the files
 transitionProbabilitiesImplemented = true;
 stageCostsImplemented = true;
-valueIterationImplemented = false; 
-policyIterationImplemented = false;
+valueIterationImplemented = true; 
+policyIterationImplemented = true;
 linearProgrammingImplemented = true;
 
 for EPOCH = 1:ep
@@ -157,6 +157,6 @@ for EPOCH = 1:ep
         end
     end
 end
-% disp('average time for VI');disp(mean(t_vi));
-% disp('average time for PI');disp(mean(t_pi));
+disp('average time for VI');disp(mean(t_vi));
+disp('average time for PI');disp(mean(t_pi));
 disp('average time for LP');disp(mean(t_lp));

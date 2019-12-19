@@ -30,7 +30,7 @@ function [ J_opt, u_opt_ind ] = LinearProgramming(P, G)
 %       	input for each element of the state space. Mapping of the
 %       	terminal state is arbitrary (for example: HOVER).
 
-global K HOVER EAST WEST NORTH SOUTH L
+global K HOVER EAST WEST NORTH SOUTH TERMINAL_STATE_INDEX
 
 
 %% INITIALIZATION
@@ -43,7 +43,6 @@ A = [ ];
 I = eye(K-1);
 
 %% Handle terminal state
-global TERMINAL_STATE_INDEX 
 
 % We need to get rid of those rows and columns related to the terminal state 
 % in P and G in computation since its stage cost is zero
@@ -52,9 +51,11 @@ P(:, TERMINAL_STATE_INDEX,:) = [ ];
 G(TERMINAL_STATE_INDEX,:) = [ ];
 
 %% LINEAR PROGRAMMING
-% If some (state, action) is not allowed, i.e. G(i,action) = Inf. We don't
+% If some (state, action) pair is not allowed, i.e. G(i,action) = Inf. We don't
 % need to add this constraint.
-for action = [HOVER, EAST, NORTH, WEST, SOUTH]
+% Construct constraint matrix and the corresponding rightside.
+
+for action = [HOVER, EAST, SOUTH, WEST, NORTH]
     row = G(:,action) ~= Inf;
     A = [A;
          I(row,:) - P(row,:,action)];
@@ -62,20 +63,22 @@ for action = [HOVER, EAST, NORTH, WEST, SOUTH]
          G(row,action)];
 end
 
-J_opt = linprog(c,A,b);
+% Linear programming solver
+options = optimoptions('linprog','Algorithm','dual-simplex','Preprocess','none', ...
+    'MaxIterations', 3000, 'ConstraintTolerance', 1e-9);
+[J_opt,~,~,~] = linprog(c,A,b,[],[],[],[],options);
 
 %% COMPUTE POLICY
 for i = 1:K-1
     for action = [HOVER, EAST, NORTH, WEST, SOUTH]
         Q(action) = G(i, action) + P(i, :, action)*J_opt;
     end
-    [~, idx] = min(Q);
-    u_opt_ind(i) = idx;
+    [~, u_opt_ind(i)] = min(Q);
 end
 
-% add back the policy and cost-to-go of terminal state
+% Add back the policy and cost-to-go of terminal state
 J_opt = [J_opt(1:TERMINAL_STATE_INDEX-1,:);0;J_opt(TERMINAL_STATE_INDEX:end,:)];
 u_opt_ind = [u_opt_ind(1:TERMINAL_STATE_INDEX-1);HOVER;u_opt_ind(TERMINAL_STATE_INDEX:end)];
 
-
+end
 
